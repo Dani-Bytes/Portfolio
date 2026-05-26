@@ -9,6 +9,8 @@ Set these in Cloudflare Pages project settings:
 - `RESEND_API_KEY` (required)
 - `CONTACT_TO_EMAIL` (required)
 - `CONTACT_FROM_EMAIL` (optional, must be a verified sender in Resend)
+- `GITHUB_TOKEN` (required for real GitHub contributions + README modals)
+- `GITHUB_USER` (optional, default: Dani-Bytes)
 
 ## Notes
 - The contact form posts to `/api/contact` which maps to `functions/api/contact.js` on Cloudflare Pages.

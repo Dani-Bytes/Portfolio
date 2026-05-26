@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
+import { marked } from 'marked'
 
 const GH_USERNAME = 'Dani-Bytes'
-const RESUME_URL = '/resume.pdf'
+const RESUME_URL = 'https://drive.google.com/file/d/1PvRHBNrl9CNe-eLGLLFCfMswSUbHaBYo/view?usp=drive_link'
 const CERTS = [
   {
     issuer: 'Coursera / IBM',
@@ -23,9 +24,72 @@ const CERTS = [
   },
 ]
 
+const PROJECTS = [
+  {
+    name: 'Code Carnival — DSA Gaming Platform',
+    status: 'STABLE',
+    description:
+      'Multi-game terminal platform: Chess (Minimax + Alpha-Beta Pruning), Maze Runner (BFS/DFS), Battleship, Snake & Flappy Bird — each backed by a purpose-specific data structure.',
+    tags: ['C++', 'DSA', 'Minimax', 'BFS/DFS', 'PostgreSQL'],
+    repo: 'Code_Carnival',
+    repoUrl: 'https://github.com/Dani-Bytes/Code_Carnival',
+    demoUrl: '',
+  },
+  {
+    name: 'Asian Antique Store',
+    status: 'DEPLOYED',
+    description:
+      'E-commerce storefront with category browsing, cart flow, and product highlights tailored for a boutique antiques brand.',
+    tags: ['React', 'Ecommerce', 'UI', 'Frontend'],
+    repo: 'Asian-Antique-Store',
+    repoUrl: 'https://github.com/Dani-Bytes/Asian-Antique-Store',
+    demoUrl: '',
+  },
+  {
+    name: 'Nova Site — Ecommerce',
+    status: 'ACTIVE',
+    description:
+      'Modern storefront experience with hero collections, curated product grids, and conversion-first layout.',
+    tags: ['React', 'UI', 'Ecommerce', 'Frontend'],
+    repo: 'Nova-Site',
+    repoUrl: 'https://github.com/Dani-Bytes/Nova-Site',
+    demoUrl: '',
+  },
+  {
+    name: 'FYP Management System',
+    status: 'DEPLOYED',
+    description:
+      'Full-scale web platform managing Final Year Projects across role-based dashboards. Proposal → evaluation → defense → grade workflow.',
+    tags: ['React', 'TypeScript', 'Tailwind CSS', 'Full-Stack', 'Role-Based Auth'],
+    repo: 'FYP_Management',
+    repoUrl: 'https://github.com/Dani-Bytes/FYP_Management',
+    demoUrl: '',
+  },
+  {
+    name: 'CyberBank — AI Banking System',
+    status: 'ACTIVE',
+    description:
+      'Terminal banking system integrated with LLM APIs for natural language queries and async voice feedback.',
+    tags: ['Python', 'Bash', 'Gemini API', 'Linux', 'AI/NLP'],
+    repo: 'CyberBank',
+    repoUrl: 'https://github.com/Dani-Bytes/CyberBank',
+    demoUrl: '',
+  },
+]
+
 function App() {
   const initRef = useRef(false)
-  const ghStatsRef = useRef({ repos: 0, followers: 0, following: 0 })
+  const ghStatsRef = useRef({ repos: 0, followers: 0, contributions: 0, streak: 0 })
+  const [blogPosts, setBlogPosts] = useState([])
+  const [blogStatus, setBlogStatus] = useState('loading')
+  const [contribDays, setContribDays] = useState([])
+  const [modalState, setModalState] = useState({
+    open: false,
+    project: null,
+    content: '',
+    loading: false,
+    error: '',
+  })
   const [ghProfile, setGhProfile] = useState({
     name: 'Muhammad Daniyal Qureshi',
     login: GH_USERNAME,
@@ -35,7 +99,8 @@ function App() {
   const [ghStats, setGhStats] = useState({
     repos: 0,
     followers: 0,
-    following: 0,
+    contributions: 0,
+    streak: 0,
   })
   const ghInitials = ghProfile.name
     .split(' ')
@@ -44,6 +109,27 @@ function App() {
     .map((part) => part[0])
     .join('')
     .toUpperCase()
+
+  const openModal = async (project) => {
+    setModalState({ open: true, project, content: '', loading: true, error: '' })
+    if (!project || !project.repo) {
+      setModalState({ open: true, project, content: '', loading: false, error: 'README not available.' })
+      return
+    }
+    try {
+      const res = await fetch(`/api/github/readme?repo=${encodeURIComponent(project.repo)}`)
+      if (!res.ok) throw new Error('readme-failed')
+      const data = await res.json()
+      const html = marked.parse(data.content || '')
+      setModalState({ open: true, project, content: html, loading: false, error: '' })
+    } catch (err) {
+      setModalState({ open: true, project, content: '', loading: false, error: 'README not available.' })
+    }
+  }
+
+  const closeModal = () => {
+    setModalState({ open: false, project: null, content: '', loading: false, error: '' })
+  }
 
   useEffect(() => {
     if (initRef.current) return
@@ -207,7 +293,6 @@ function App() {
           d.classList.add('active')
           safeTimeout(() => openWin('wt'), 300)
           safeTimeout(() => showNotif('DaniOS ready — type help in terminal'), 900)
-          initContrib()
           safeTimeout(animSkills, 700)
           safeTimeout(animGH, 700)
         }
@@ -237,6 +322,7 @@ function App() {
       wg: [130, 48],
       wco: [170, 70],
       wach: [220, 75],
+      wb: [140, 80],
     }
 
     function openWin(id) {
@@ -354,6 +440,7 @@ function App() {
           ['projects', '→ classified modules'],
           ['skills', '→ system diagnostics'],
           ['certs', '→ credentials vault'],
+          ['blog', '→ case studies feed'],
           ['github', '→ git analytics'],
           ['contact', '→ secure channel'],
           ['achievements', '→ sudo honors'],
@@ -391,6 +478,10 @@ function App() {
       certifications() {
         openWin('wc')
         tLine('Reading certifications.log...')
+      },
+      blog() {
+        openWin('wb')
+        tLine('Opening case studies feed...')
       },
       github() {
         openWin('wg')
@@ -436,6 +527,7 @@ function App() {
         tLine('drwxr-xr-x   <span style="color:var(--cyan)">projects</span>        3 classified modules')
         tLine('drwxr-xr-x   <span style="color:var(--cyan)">skills</span>          System diagnostics')
         tLine('drwxr-xr-x   <span style="color:var(--cyan)">certifications</span>  3 verified credentials')
+        tLine('drwxr-xr-x   <span style="color:var(--cyan)">blog</span>            Case studies feed')
         tLine('-rwxr-xr-x   <span style="color:var(--cyan)">github</span>          @Dani-Bytes analytics')
         tLine('-r--------   <span style="color:var(--amber)">achievements</span>    [sudo required]')
         tLine('-rwxr-xr-x   <span style="color:var(--cyan)">contact</span>         Secure channel')
@@ -537,8 +629,8 @@ function App() {
     // GITHUB
     function animGH() {
       animCount('rc', 0, ghStatsRef.current.repos, 1200)
-      animCount('cc', 0, ghStatsRef.current.followers, 1200)
-      animCount('sc2', 0, ghStatsRef.current.following, 1200)
+      animCount('cc', 0, ghStatsRef.current.contributions, 1200)
+      animCount('sc2', 0, ghStatsRef.current.streak, 1200)
     }
 
     function animCount(id, f, t, dur) {
@@ -567,44 +659,101 @@ function App() {
 
     const loadGitHub = async () => {
       try {
-        const res = await fetch(`https://api.github.com/users/${GH_USERNAME}`)
-        if (!res.ok) return
+        const res = await fetch('/api/github/profile')
+        if (!res.ok) throw new Error('profile-failed')
         const data = await res.json()
         const profile = {
           name: data.name || data.login || GH_USERNAME,
           login: data.login || GH_USERNAME,
-          avatarUrl: data.avatar_url || '',
-          htmlUrl: data.html_url || `https://github.com/${GH_USERNAME}`,
-        }
-        const stats = {
-          repos: Number.isFinite(data.public_repos) ? data.public_repos : 0,
-          followers: Number.isFinite(data.followers) ? data.followers : 0,
-          following: Number.isFinite(data.following) ? data.following : 0,
+          avatarUrl: data.avatarUrl || '',
+          htmlUrl: data.htmlUrl || `https://github.com/${GH_USERNAME}`,
         }
         setGhProfile(profile)
-        setGhStats(stats)
-        ghStatsRef.current = stats
+      } catch (err) {
+        try {
+          const res = await fetch(`https://api.github.com/users/${GH_USERNAME}`)
+          if (!res.ok) return
+          const data = await res.json()
+          setGhProfile({
+            name: data.name || data.login || GH_USERNAME,
+            login: data.login || GH_USERNAME,
+            avatarUrl: data.avatar_url || '',
+            htmlUrl: data.html_url || `https://github.com/${GH_USERNAME}`,
+          })
+        } catch (innerErr) {
+          // Keep fallback values if GitHub API fails.
+        }
+      }
+    }
+
+    const loadContribs = async () => {
+      try {
+        const res = await fetch('/api/github/contributions')
+        if (!res.ok) throw new Error('contrib-failed')
+        const data = await res.json()
+        const days = Array.isArray(data.days) ? data.days : []
+        setContribDays(days)
+
+        const total = days.reduce((sum, day) => sum + (day.count || 0), 0)
+        let streak = 0
+        for (let i = days.length - 1; i >= 0; i -= 1) {
+          if (days[i].count > 0) streak += 1
+          else break
+        }
+
+        const stats = {
+          repos: ghStatsRef.current.repos,
+          followers: ghStatsRef.current.followers,
+          contributions: total,
+          streak,
+        }
+        setGhStats((prev) => ({
+          ...prev,
+          contributions: total,
+          streak,
+        }))
+        ghStatsRef.current = { ...ghStatsRef.current, ...stats }
         safeTimeout(animGH, 200)
       } catch (err) {
         // Keep fallback values if GitHub API fails.
       }
     }
-    loadGitHub()
 
-    // CONTRIBUTIONS
-    function initContrib() {
-      const g = document.getElementById('cgrid')
-      if (!g) return
-      const lvs = ['#0a150a', '#0d3d15', '#14662a', '#1a9940', '#22cc55']
-      for (let i = 0; i < 364; i++) {
-        const d = document.createElement('div')
-        d.className = 'cday'
-        const r = Math.random()
-        const lv = r < 0.5 ? 0 : r < 0.65 ? 1 : r < 0.78 ? 2 : r < 0.9 ? 3 : 4
-        d.style.background = lvs[lv]
-        g.appendChild(d)
+    const loadGitHubStats = async () => {
+      try {
+        const res = await fetch('/api/github/profile')
+        if (!res.ok) throw new Error('profile-failed')
+        const data = await res.json()
+        const stats = {
+          repos: Number.isFinite(data.publicRepos) ? data.publicRepos : 0,
+          followers: Number.isFinite(data.followers) ? data.followers : 0,
+          contributions: ghStatsRef.current.contributions,
+          streak: ghStatsRef.current.streak,
+        }
+        setGhStats((prev) => ({ ...prev, repos: stats.repos, followers: stats.followers }))
+        ghStatsRef.current = { ...ghStatsRef.current, ...stats }
+        safeTimeout(animGH, 200)
+      } catch (err) {
+        // Keep fallback values.
       }
     }
+
+    const loadBlogs = async () => {
+      try {
+        const res = await fetch('/api/blogs')
+        if (!res.ok) throw new Error('blogs-failed')
+        const data = await res.json()
+        setBlogPosts(Array.isArray(data.items) ? data.items : [])
+        setBlogStatus('ready')
+      } catch (err) {
+        setBlogStatus('error')
+      }
+    }
+
+    loadGitHub()
+    loadGitHubStats()
+    loadContribs()
+    loadBlogs()
 
     // CONTACT
     async function sendMsg() {
@@ -868,79 +1017,37 @@ function App() {
           <div className="win-body">
             <div className="pj-wrap">
               <div style={{ fontSize: '10px', color: 'var(--text3)', padding: '4px 4px 0' }}>
-                total 3 classified modules  ·  drwxr-xr-x
+                total {PROJECTS.length} classified modules  ·  drwxr-xr-x
               </div>
-
-              <div className="pj">
-                <div className="ph">
-                  <span className="pn">⬡ FYP Management System</span>
-                  <span className="ps">● DEPLOYED</span>
+              {PROJECTS.map((project) => (
+                <div className="pj" key={project.name}>
+                  <div className="ph">
+                    <span className="pn">⬡ {project.name}</span>
+                    <span className="ps">● {project.status}</span>
+                  </div>
+                  <div className="pd">{project.description}</div>
+                  <div className="ptags">
+                    {project.tags.map((tag) => (
+                      <span className="tag" key={tag}>
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="plinks">
+                    <button className="plbtn" onClick={() => window.open(project.repoUrl, '_blank')}>
+                      $ git clone ↗
+                    </button>
+                    <button className="plbtn" onClick={() => openModal(project)}>
+                      $ readme
+                    </button>
+                    {project.demoUrl ? (
+                      <button className="plbtn" style={{ color: 'var(--green)', borderColor: 'var(--green3)' }} onClick={() => window.open(project.demoUrl, '_blank')}>
+                        $ ./launch_demo
+                      </button>
+                    ) : null}
+                  </div>
                 </div>
-                <div className="pd">
-                  Full-scale web platform managing Final Year Projects across 5 role-based dashboards — Students, Supervisors, Coordinators, HOD & Evaluators. Real-time data visualizations, modular React+TS frontend, proposal → peer eval → defense → grade workflow.
-                </div>
-                <div className="ptags">
-                  <span className="tag">React</span>
-                  <span className="tag">TypeScript</span>
-                  <span className="tag">Tailwind CSS</span>
-                  <span className="tag">Full-Stack</span>
-                  <span className="tag">Role-Based Auth</span>
-                </div>
-                <div className="plinks">
-                  <button className="plbtn" onClick={() => window.open('https://github.com/Dani-Bytes', '_blank')}>
-                    $ git clone ↗
-                  </button>
-                  <button className="plbtn" style={{ color: 'var(--green)', borderColor: 'var(--green3)' }}>
-                    $ ./launch_demo
-                  </button>
-                </div>
-              </div>
-
-              <div className="pj">
-                <div className="ph">
-                  <span className="pn">⬡ CyberBank — AI Banking System</span>
-                  <span className="ps">● ACTIVE</span>
-                </div>
-                <div className="pd">
-                  Terminal banking system integrated with Google Gemini API for natural language queries. Async voice feedback via FCFS priority queue (gTTS) with non-blocking UI. Applies OS concepts: process management, concurrency, IPC, file-based persistence.
-                </div>
-                <div className="ptags">
-                  <span className="tag">Python</span>
-                  <span className="tag">Bash</span>
-                  <span className="tag">Gemini API</span>
-                  <span className="tag">Linux</span>
-                  <span className="tag">AI/NLP</span>
-                  <span className="tag">OS Concepts</span>
-                </div>
-                <div className="plinks">
-                  <button className="plbtn" onClick={() => window.open('https://github.com/Dani-Bytes', '_blank')}>
-                    $ git clone ↗
-                  </button>
-                </div>
-              </div>
-
-              <div className="pj">
-                <div className="ph">
-                  <span className="pn">⬡ Code Carnival — DSA Gaming Platform</span>
-                  <span className="ps">● STABLE</span>
-                </div>
-                <div className="pd">
-                  Multi-game terminal platform: Chess (Minimax + Alpha-Beta Pruning), Maze Runner (BFS/DFS), Battleship, Snake & Flappy Bird — each backed by a purpose-specific data structure. Relational DB with stored procedures & triggers for leaderboards.
-                </div>
-                <div className="ptags">
-                  <span className="tag">C++</span>
-                  <span className="tag">DSA</span>
-                  <span className="tag">Minimax</span>
-                  <span className="tag">BFS/DFS</span>
-                  <span className="tag">Dijkstra</span>
-                  <span className="tag">PostgreSQL</span>
-                </div>
-                <div className="plinks">
-                  <button className="plbtn" onClick={() => window.open('https://github.com/Dani-Bytes', '_blank')}>
-                    $ git clone ↗
-                  </button>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
@@ -1106,6 +1213,45 @@ function App() {
           </div>
         </div>
 
+        <div className="win" id="wb">
+          <div className="win-tb" onMouseDown={(e) => window.startDrag?.(e, 'wb')}>
+            <div className="wc-wrap">
+              <div className="wc wc-x" onClick={() => window.closeWin?.('wb')}></div>
+              <div className="wc wc-m" onClick={() => window.closeWin?.('wb')}></div>
+              <div className="wc wc-z"></div>
+            </div>
+            <div className="win-title-text">cat ~/case_studies.log — [auto-refresh 24h]</div>
+          </div>
+          <div className="win-body">
+            <div className="blog">
+              <div className="blog-hint">// curated open source case studies (top 4)</div>
+              {blogStatus === 'error' ? (
+                <div className="blog-empty">Feed unavailable. Try again later.</div>
+              ) : null}
+              {blogStatus === 'loading' ? (
+                <div className="blog-empty">Loading feed...</div>
+              ) : null}
+              {blogStatus === 'ready' && blogPosts.length === 0 ? (
+                <div className="blog-empty">No entries available.</div>
+              ) : null}
+              {blogPosts.map((post) => (
+                <div className="blog-item" key={post.url}>
+                  <div className="blog-top">
+                    <div className="blog-title">{post.title}</div>
+                    <div className="blog-meta">{post.source} · {post.date}</div>
+                  </div>
+                  <div className="blog-desc">{post.description}</div>
+                  <div className="blog-actions">
+                    <a className="plbtn blog-link" href={post.url} target="_blank" rel="noreferrer">
+                      read ↗
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
         <div className="win" id="wg">
           <div className="win-tb" onMouseDown={(e) => window.startDrag?.(e, 'wg')}>
             <div className="wc-wrap">
@@ -1144,23 +1290,36 @@ function App() {
                 </div>
                 <div className="gh-sc">
                   <span className="gh-sn" id="cc">
-                    {ghStats.followers}
+                    {ghStats.contributions}
                   </span>
-                  <span className="gh-sl">followers</span>
+                  <span className="gh-sl">contribs</span>
                 </div>
                 <div className="gh-sc">
                   <span className="gh-sn" id="sc2">
-                    {ghStats.following}
+                    {ghStats.streak}
                   </span>
-                  <span className="gh-sl">following</span>
+                  <span className="gh-sl">day streak</span>
                 </div>
                 <div className="gh-sc">
-                  <span className="gh-sn">3</span>
-                  <span className="gh-sl">projects</span>
+                  <span className="gh-sn">{ghStats.followers}</span>
+                  <span className="gh-sl">followers</span>
                 </div>
               </div>
               <div className="cg-label">// contribution graph — last 52 weeks</div>
-              <div className="cg" id="cgrid"></div>
+              <div className="cg" id="cgrid">
+                {contribDays.length ? (
+                  contribDays.map((day) => (
+                    <div
+                      key={day.date}
+                      className="cday"
+                      title={`${day.date} · ${day.count} contributions`}
+                      style={{ background: day.color }}
+                    ></div>
+                  ))
+                ) : (
+                  <div className="cday" style={{ background: '#0a150a' }}></div>
+                )}
+              </div>
               <div className="lb-wrap">
                 <div className="lb-label">// language distribution</div>
                 <div className="lb-row">
@@ -1286,6 +1445,26 @@ function App() {
           </div>
         </div>
 
+        {modalState.open ? (
+          <div id="modal" onClick={closeModal}>
+            <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-head">
+                <div className="modal-title">{modalState.project?.name || 'Project'}</div>
+                <button className="modal-close" onClick={closeModal}>
+                  close
+                </button>
+              </div>
+              <div className="modal-body">
+                {modalState.loading ? <div className="modal-status">Loading README...</div> : null}
+                {modalState.error ? <div className="modal-status error">{modalState.error}</div> : null}
+                {!modalState.loading && !modalState.error ? (
+                  <div className="modal-content" dangerouslySetInnerHTML={{ __html: modalState.content }}></div>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        ) : null}
+
         <div id="dock">
           <div className="dk" id="dk-wt" onClick={() => window.openWin?.('wt')}>
             <span className="dk-icon">⌨</span>
@@ -1316,6 +1495,12 @@ function App() {
             <span>certs</span>
             <div className="dk-dot"></div>
             <span className="dk-tip">Certifications</span>
+          </div>
+          <div className="dk" id="dk-wb" onClick={() => window.openWin?.('wb')}>
+            <span className="dk-icon">📰</span>
+            <span>blog</span>
+            <div className="dk-dot"></div>
+            <span className="dk-tip">Case Studies</span>
           </div>
           <div className="dk" id="dk-wg" onClick={() => window.openWin?.('wg')}>
             <span className="dk-icon">⬡</span>
