@@ -24,6 +24,37 @@ const CERTS = [
   },
 ]
 
+const FALLBACK_BLOGS = [
+  {
+    title: 'Case study: The GitHub engineering blog archive',
+    url: 'https://github.blog/engineering/',
+    date: 'Always fresh',
+    description: 'Deep dives into systems, performance, and product engineering write-ups from GitHub.',
+    source: 'GitHub Blog',
+  },
+  {
+    title: 'Case study: Cloudflare technical posts',
+    url: 'https://blog.cloudflare.com/',
+    date: 'Always fresh',
+    description: 'Infrastructure, security, and edge-compute engineering case studies.',
+    source: 'Cloudflare Blog',
+  },
+  {
+    title: 'Case study: freeCodeCamp engineering stories',
+    url: 'https://www.freecodecamp.org/news/',
+    date: 'Always fresh',
+    description: 'Practical engineering stories and deep technical explainers.',
+    source: 'freeCodeCamp',
+  },
+  {
+    title: 'Case study: dev.to top articles',
+    url: 'https://dev.to/t',
+    date: 'Always fresh',
+    description: 'Top community engineering write-ups across web, AI, and infra.',
+    source: 'dev.to',
+  },
+]
+
 const PROJECTS = [
   {
     name: 'Code Carnival — DSA Gaming Platform',
@@ -743,9 +774,15 @@ function App() {
         const res = await fetch('/api/blogs')
         if (!res.ok) throw new Error('blogs-failed')
         const data = await res.json()
-        setBlogPosts(Array.isArray(data.items) ? data.items : [])
+        const items = Array.isArray(data.items) ? data.items : []
+        if (items.length === 0) {
+          setBlogPosts(FALLBACK_BLOGS)
+        } else {
+          setBlogPosts(items)
+        }
         setBlogStatus('ready')
       } catch (err) {
+        setBlogPosts(FALLBACK_BLOGS)
         setBlogStatus('error')
       }
     }
