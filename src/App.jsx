@@ -4,22 +4,22 @@ const GH_USERNAME = 'Dani-Bytes'
 const RESUME_URL = '/resume.pdf'
 const CERTS = [
   {
-    issuer: 'Coursera / DeepLearning.AI — Andrew Ng',
-    title: 'AI For Everyone',
+    issuer: 'Coursera / IBM',
+    title: 'Python for Data Science, AI & Development',
     credential: 'Certificate of Completion',
-    verifyUrl: '',
+    verifyUrl: 'https://www.credly.com/earner/earned/badge/4cd77776-cba3-462f-ac1a-286232bee2a9',
   },
   {
     issuer: 'Coursera / Johns Hopkins University',
     title: 'HTML, CSS & JavaScript for Web Developers',
     credential: 'Certificate of Completion',
-    verifyUrl: '',
+    verifyUrl: 'https://www.coursera.org/account/accomplishments/verify/S525DXYCKY7N',
   },
   {
-    issuer: 'Coursera / IBM',
-    title: 'Python for Data Science, AI & Development',
+    issuer: 'Coursera / DeepLearning.AI — Andrew Ng',
+    title: 'AI For Everyone',
     credential: 'Certificate of Completion',
-    verifyUrl: '',
+    verifyUrl: 'https://www.coursera.org/account/accomplishments/verify/HB8SU0LRFZVV',
   },
 ]
 
