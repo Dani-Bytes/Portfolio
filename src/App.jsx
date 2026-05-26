@@ -1208,7 +1208,7 @@ function App() {
         <div id="dock">
           <div className="dk" id="dk-wt" onClick={() => window.openWin?.('wt')}>
             <span className="dk-icon">⌨</span>
-            <span>>_</span>
+            <span>{'>_'}</span>
             <div className="dk-dot"></div>
             <span className="dk-tip">Terminal</span>
           </div>
