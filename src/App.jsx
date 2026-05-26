@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { marked } from 'marked'
 
 const GH_USERNAME = 'Dani-Bytes'
-const RESUME_URL = 'https://drive.google.com/file/d/1PvRHBNrl9CNe-eLGLLFCfMswSUbHaBYo/view?usp=drive_link'
+const RESUME_URL = '/DanuResume.pdf'
 const CERTS = [
   {
     issuer: 'Coursera / IBM',
@@ -983,8 +983,8 @@ function App() {
                 {RESUME_URL ? (
                   <div>
                     $ resume →{' '}
-                    <a className="lnk" href={RESUME_URL} target="_blank" rel="noreferrer">
-                      download ↗
+                    <a className="lnk" href={RESUME_URL} download>
+                      download resume ↗
                     </a>
                   </div>
                 ) : null}
