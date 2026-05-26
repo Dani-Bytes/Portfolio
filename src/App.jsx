@@ -808,17 +808,17 @@ function App() {
       s.style.color = 'var(--amber)'
       s.textContent = 'Encrypting transmission...'
       try {
-        const res = await fetch('/api/contact', {
+        const res = await fetch('https://formspree.io/f/mnjrgkwp', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ from: f, message: m }),
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ email: f, message: m }),
         })
         if (!res.ok) {
           s.textContent = 'ERROR: Transmission failed. Try again.'
           s.style.color = 'var(--red)'
           return
         }
-        s.textContent = '✓ Message transmitted successfully to daniyal@portfolio.'
+        s.textContent = '✓ Message transmitted successfully.'
         s.style.color = 'var(--green)'
         fEl.value = ''
         mEl.value = ''
