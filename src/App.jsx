@@ -1,7 +1,49 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+
+const GH_USERNAME = 'Dani-Bytes'
+const RESUME_URL = '/resume.pdf'
+const CERTS = [
+  {
+    issuer: 'Coursera / DeepLearning.AI — Andrew Ng',
+    title: 'AI For Everyone',
+    credential: 'Certificate of Completion',
+    verifyUrl: '',
+  },
+  {
+    issuer: 'Coursera / Johns Hopkins University',
+    title: 'HTML, CSS & JavaScript for Web Developers',
+    credential: 'Certificate of Completion',
+    verifyUrl: '',
+  },
+  {
+    issuer: 'Coursera / IBM',
+    title: 'Python for Data Science, AI & Development',
+    credential: 'Certificate of Completion',
+    verifyUrl: '',
+  },
+]
 
 function App() {
   const initRef = useRef(false)
+  const ghStatsRef = useRef({ repos: 0, followers: 0, following: 0 })
+  const [ghProfile, setGhProfile] = useState({
+    name: 'Muhammad Daniyal Qureshi',
+    login: GH_USERNAME,
+    avatarUrl: '',
+    htmlUrl: `https://github.com/${GH_USERNAME}`,
+  })
+  const [ghStats, setGhStats] = useState({
+    repos: 0,
+    followers: 0,
+    following: 0,
+  })
+  const ghInitials = ghProfile.name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase()
 
   useEffect(() => {
     if (initRef.current) return
@@ -494,9 +536,9 @@ function App() {
 
     // GITHUB
     function animGH() {
-      animCount('rc', 0, 12, 1200)
-      animCount('cc', 0, 127, 1500)
-      animCount('sc2', 0, 14, 900)
+      animCount('rc', 0, ghStatsRef.current.repos, 1200)
+      animCount('cc', 0, ghStatsRef.current.followers, 1200)
+      animCount('sc2', 0, ghStatsRef.current.following, 1200)
     }
 
     function animCount(id, f, t, dur) {
@@ -522,6 +564,32 @@ function App() {
         }, 100 + i * 100)
       })
     }
+
+    const loadGitHub = async () => {
+      try {
+        const res = await fetch(`https://api.github.com/users/${GH_USERNAME}`)
+        if (!res.ok) return
+        const data = await res.json()
+        const profile = {
+          name: data.name || data.login || GH_USERNAME,
+          login: data.login || GH_USERNAME,
+          avatarUrl: data.avatar_url || '',
+          htmlUrl: data.html_url || `https://github.com/${GH_USERNAME}`,
+        }
+        const stats = {
+          repos: Number.isFinite(data.public_repos) ? data.public_repos : 0,
+          followers: Number.isFinite(data.followers) ? data.followers : 0,
+          following: Number.isFinite(data.following) ? data.following : 0,
+        }
+        setGhProfile(profile)
+        setGhStats(stats)
+        ghStatsRef.current = stats
+        safeTimeout(animGH, 200)
+      } catch (err) {
+        // Keep fallback values if GitHub API fails.
+      }
+    }
+    loadGitHub()
 
     // CONTRIBUTIONS
     function initContrib() {
@@ -763,6 +831,14 @@ function App() {
               <div className="about-links">
                 <div>$ email  → <span className="lnk">daniyalqureshi164@gmail.com</span></div>
                 <div>$ phone  → <span style={{ color: 'var(--text2)' }}>+92-346-1706663</span></div>
+                {RESUME_URL ? (
+                  <div>
+                    $ resume →{' '}
+                    <a className="lnk" href={RESUME_URL} target="_blank" rel="noreferrer">
+                      download ↗
+                    </a>
+                  </div>
+                ) : null}
                 <div>
                   $ github →{' '}
                   <span className="lnk" onClick={() => window.open('https://github.com/Dani-Bytes', '_blank')}>
@@ -1012,21 +1088,20 @@ function App() {
           </div>
           <div className="win-body">
             <div className="certs">
-              <div className="cert">
-                <div className="ci">Coursera / DeepLearning.AI — Andrew Ng</div>
-                <div className="cn">AI For Everyone</div>
-                <div className="cm">Certificate of Completion</div>
-              </div>
-              <div className="cert">
-                <div className="ci">Coursera / Johns Hopkins University</div>
-                <div className="cn">HTML, CSS &amp; JavaScript for Web Developers</div>
-                <div className="cm">Certificate of Completion</div>
-              </div>
-              <div className="cert">
-                <div className="ci">Coursera / IBM</div>
-                <div className="cn">Python for Data Science, AI &amp; Development</div>
-                <div className="cm">Certificate of Completion</div>
-              </div>
+              {CERTS.map((cert) => (
+                <div className="cert" key={cert.title}>
+                  <div className="ci">{cert.issuer}</div>
+                  <div className="cn">{cert.title}</div>
+                  <div className="cm">{cert.credential}</div>
+                  {cert.verifyUrl ? (
+                    <div className="cert-actions">
+                      <a className="plbtn cert-link" href={cert.verifyUrl} target="_blank" rel="noreferrer">
+                        verify ↗
+                      </a>
+                    </div>
+                  ) : null}
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -1043,13 +1118,19 @@ function App() {
           <div className="win-body">
             <div className="gh">
               <div className="gh-top">
-                <div className="gh-av">DQ</div>
+                <div className="gh-av">
+                  {ghProfile.avatarUrl ? (
+                    <img src={ghProfile.avatarUrl} alt="" />
+                  ) : (
+                    <span>{ghInitials || 'DQ'}</span>
+                  )}
+                </div>
                 <div>
-                  <div className="gh-nm">Muhammad Daniyal Qureshi</div>
-                  <div className="gh-hn">@Dani-Bytes</div>
+                  <div className="gh-nm">{ghProfile.name}</div>
+                  <div className="gh-hn">@{ghProfile.login}</div>
                   <div style={{ marginTop: '8px' }}>
-                    <button className="plbtn" onClick={() => window.open('https://github.com/Dani-Bytes', '_blank')}>
-                      $ open github.com/Dani-Bytes ↗
+                    <button className="plbtn" onClick={() => window.open(ghProfile.htmlUrl, '_blank')}>
+                      $ open github.com/{ghProfile.login} ↗
                     </button>
                   </div>
                 </div>
@@ -1057,21 +1138,21 @@ function App() {
               <div className="gh-sg">
                 <div className="gh-sc">
                   <span className="gh-sn" id="rc">
-                    0
+                    {ghStats.repos}
                   </span>
                   <span className="gh-sl">repos</span>
                 </div>
                 <div className="gh-sc">
                   <span className="gh-sn" id="cc">
-                    0
+                    {ghStats.followers}
                   </span>
-                  <span className="gh-sl">commits</span>
+                  <span className="gh-sl">followers</span>
                 </div>
                 <div className="gh-sc">
                   <span className="gh-sn" id="sc2">
-                    0
+                    {ghStats.following}
                   </span>
-                  <span className="gh-sl">day streak</span>
+                  <span className="gh-sl">following</span>
                 </div>
                 <div className="gh-sc">
                   <span className="gh-sn">3</span>
